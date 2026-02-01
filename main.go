@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 // In-memory storage (sementara, nanti ganti database)
@@ -49,22 +48,22 @@ func main() {
 	// POST localhost:8080/api/produk
 	http.HandleFunc("POST /api/produk", createProduk)
 	// GET localhost:8080/api/produk/{id}
-	http.HandleFunc("GET /api/produk/", getProdukByID)
+	http.HandleFunc("GET /api/produk/{id}", getProdukByID)
 	// PUT localhost:8080/api/produk/{id}
-	http.HandleFunc("PUT /api/produk/", updateProduk)
+	http.HandleFunc("PUT /api/produk/{id}", updateProduk)
 	// DELETE localhost:8080/api/produk/{id}
-	http.HandleFunc("DELETE /api/produk/", deleteProduk)
+	http.HandleFunc("DELETE /api/produk/{id}", deleteProduk)
 
 	// GET localhost:8080/api/categories
 	http.HandleFunc("GET /api/categories", listKategori)
 	// POST localhost:8080/api/categories
 	http.HandleFunc("POST /api/categories", createKategori)
 	// GET localhost:8080/api/categories/{id}
-	http.HandleFunc("GET /api/categories/", getKategoriByID)
+	http.HandleFunc("GET /api/categories/{id}", getKategoriByID)
 	// PUT localhost:8080/api/categories/{id}
-	http.HandleFunc("PUT /api/categories/", updateKategori)
+	http.HandleFunc("PUT /api/categories/{id}", updateKategori)
 	// DELETE localhost:8080/api/categories/{id}
-	http.HandleFunc("DELETE /api/categories/", deleteKategori)
+	http.HandleFunc("DELETE /api/categories/{id}", deleteKategori)
 
 	fmt.Println("Server Running di Localhost:8080")
 
@@ -101,7 +100,7 @@ func createProduk(w http.ResponseWriter, r *http.Request) {
 func getProdukByID(w http.ResponseWriter, r *http.Request) {
 	// Parse ID dari URL path
 	// URL: /api/produk/123 -> ID = 123
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid Produk ID", http.StatusBadRequest)
@@ -124,7 +123,7 @@ func getProdukByID(w http.ResponseWriter, r *http.Request) {
 // PUT localhost:8080/api/produk/{id}
 func updateProduk(w http.ResponseWriter, r *http.Request) {
 	// get id dari request
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := r.PathValue("id")
 
 	// ganti int
 	id, err := strconv.Atoi(idStr)
@@ -158,7 +157,7 @@ func updateProduk(w http.ResponseWriter, r *http.Request) {
 
 func deleteProduk(w http.ResponseWriter, r *http.Request) {
 	// get id
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
+	idStr := r.PathValue("id")
 
 	// ganti id int
 	id, err := strconv.Atoi(idStr)
@@ -210,7 +209,7 @@ func createKategori(w http.ResponseWriter, r *http.Request) {
 // PUT localhost:8080/api/categories/{id}
 func updateKategori(w http.ResponseWriter, r *http.Request) {
 	// get id dari request
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := r.PathValue("id")
 
 	// ganti int
 	id, err := strconv.Atoi(idStr)
@@ -245,7 +244,7 @@ func updateKategori(w http.ResponseWriter, r *http.Request) {
 func getKategoriByID(w http.ResponseWriter, r *http.Request) {
 	// Parse ID dari URL path
 	// URL: /api/categories/123 -> ID = 123
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid Kategori ID", http.StatusBadRequest)
@@ -267,7 +266,7 @@ func getKategoriByID(w http.ResponseWriter, r *http.Request) {
 
 func deleteKategori(w http.ResponseWriter, r *http.Request) {
 	// get id
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/categories/")
+	idStr := r.PathValue("id")
 
 	// ganti id int
 	id, err := strconv.Atoi(idStr)
