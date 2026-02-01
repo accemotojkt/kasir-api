@@ -93,7 +93,7 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Produk ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Product ID", http.StatusBadRequest)
 		return
 	}
 
@@ -107,7 +107,7 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kalau tidak found
-	http.Error(w, "Produk belum ada", http.StatusNotFound)
+	http.Error(w, "Product not found", http.StatusNotFound)
 }
 
 // PUT localhost:8080/api/produk/{id}
@@ -118,7 +118,7 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 	// ganti int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Produk ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Product ID", http.StatusBadRequest)
 		return
 	}
 
@@ -142,7 +142,7 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Error(w, "Produk belum ada", http.StatusNotFound)
+	http.Error(w, "Product not found", http.StatusNotFound)
 }
 
 func deleteProduct(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +152,7 @@ func deleteProduct(w http.ResponseWriter, r *http.Request) {
 	// ganti id int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Produk ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Product ID", http.StatusBadRequest)
 		return
 	}
 
@@ -164,13 +164,13 @@ func deleteProduct(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": "sukses delete",
+				"message": "Deleted successfully",
 			})
 			return
 		}
 	}
 
-	http.Error(w, "Produk belum ada", http.StatusNotFound)
+	http.Error(w, "Product not found", http.StatusNotFound)
 }
 
 func listCategories(w http.ResponseWriter, r *http.Request) {
@@ -204,7 +204,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 	// ganti int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Kategori ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Category ID", http.StatusBadRequest)
 		return
 	}
 
@@ -228,7 +228,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Error(w, "Kategori belum ada", http.StatusNotFound)
+	http.Error(w, "Category not found", http.StatusNotFound)
 }
 
 func getCategoryByID(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +237,7 @@ func getCategoryByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Kategori ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Category ID", http.StatusBadRequest)
 		return
 	}
 
@@ -251,7 +251,7 @@ func getCategoryByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kalau tidak found
-	http.Error(w, "Kategori belum ada", http.StatusNotFound)
+	http.Error(w, "Category not found", http.StatusNotFound)
 }
 
 func deleteCategory(w http.ResponseWriter, r *http.Request) {
@@ -261,7 +261,7 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) {
 	// ganti id int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid Kategori ID", http.StatusBadRequest)
+		http.Error(w, "Invalid Category ID", http.StatusBadRequest)
 		return
 	}
 
@@ -273,11 +273,11 @@ func deleteCategory(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": "sukses delete",
+				"message": "Deleted successfully",
 			})
 			return
 		}
 	}
 
-	http.Error(w, "Kategori belum ada", http.StatusNotFound)
+	http.Error(w, "Category not found", http.StatusNotFound)
 }
