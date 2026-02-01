@@ -43,26 +43,16 @@ func main() {
 		})
 	})
 
-	// GET localhost:8080/api/produk
 	http.HandleFunc("GET /api/produk", listProduk)
-	// POST localhost:8080/api/produk
 	http.HandleFunc("POST /api/produk", createProduk)
-	// GET localhost:8080/api/produk/{id}
 	http.HandleFunc("GET /api/produk/{id}", getProdukByID)
-	// PUT localhost:8080/api/produk/{id}
 	http.HandleFunc("PUT /api/produk/{id}", updateProduk)
-	// DELETE localhost:8080/api/produk/{id}
 	http.HandleFunc("DELETE /api/produk/{id}", deleteProduk)
 
-	// GET localhost:8080/api/categories
 	http.HandleFunc("GET /api/categories", listKategori)
-	// POST localhost:8080/api/categories
 	http.HandleFunc("POST /api/categories", createKategori)
-	// GET localhost:8080/api/categories/{id}
 	http.HandleFunc("GET /api/categories/{id}", getKategoriByID)
-	// PUT localhost:8080/api/categories/{id}
 	http.HandleFunc("PUT /api/categories/{id}", updateKategori)
-	// DELETE localhost:8080/api/categories/{id}
 	http.HandleFunc("DELETE /api/categories/{id}", deleteKategori)
 
 	fmt.Println("Server Running di Localhost:8080")
