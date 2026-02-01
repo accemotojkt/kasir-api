@@ -3,32 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"kasir-api/models"
 	"net/http"
 	"strconv"
 )
 
 // In-memory storage (sementara, nanti ganti database)
-var products = []Product{
+var products = []models.Product{
 	{ID: 1, Name: "Indomie Godog", Price: 3500, Stock: 10},
 	{ID: 2, Name: "Vit 1000ml", Price: 3000, Stock: 40},
 	{ID: 3, Name: "kecap", Price: 12000, Stock: 20},
 }
 
-// Product represents a product in the cashier system
-type Product struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
-	Stock int    `json:"stock"`
-}
-
-type Category struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-var categories = []Category{
+var categories = []models.Category{
 	{ID: 1, Name: "Mie Instant", Description: "Mie"},
 	{ID: 2, Name: "Minuman", Description: "Minum Botol"},
 }
@@ -71,7 +58,7 @@ func listProducts(w http.ResponseWriter, r *http.Request) {
 
 func createProduct(w http.ResponseWriter, r *http.Request) {
 	// baca data dari request
-	var newProduct Product
+	var newProduct models.Product
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -123,7 +110,7 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data dari request
-	var updateProduct Product
+	var updateProduct models.Product
 	err = json.NewDecoder(r.Body).Decode(&updateProduct)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -180,7 +167,7 @@ func listCategories(w http.ResponseWriter, r *http.Request) {
 
 func createCategory(w http.ResponseWriter, r *http.Request) {
 	// baca data dari request
-	var newCategory Category
+	var newCategory models.Category
 	err := json.NewDecoder(r.Body).Decode(&newCategory)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -209,7 +196,7 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data dari request
-	var updateCategory Category
+	var updateCategory models.Category
 	err = json.NewDecoder(r.Body).Decode(&updateCategory)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
