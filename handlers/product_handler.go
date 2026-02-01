@@ -3,23 +3,31 @@ package handlers
 import (
 	"encoding/json"
 	"kasir-api/models"
+	"kasir-api/services"
 	"net/http"
 	"strconv"
 )
 
-// In-memory storage (sementara, nanti ganti database)
-var products = []models.Product{
-	{ID: 1, Name: "Indomie Godog", Price: 3500, Stock: 10},
-	{ID: 2, Name: "Vit 1000ml", Price: 3000, Stock: 40},
-	{ID: 3, Name: "kecap", Price: 12000, Stock: 20},
+type ProductHandler struct {
+	service *services.ProductService
 }
 
-func ListProducts(w http.ResponseWriter, r *http.Request) {
+func NewProductHandler(service *services.ProductService) *ProductHandler {
+	return &ProductHandler{service: service}
+}
+
+func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	products, err := h.service.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
 }
 
-func CreateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// baca data dari request
 	var newProduct models.Product
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
@@ -28,16 +36,18 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// masukkin data ke dalam variable products
-	newProduct.ID = len(products) + 1
-	products = append(products, newProduct)
+	err = h.service.Create(&newProduct)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated) // 201
 	json.NewEncoder(w).Encode(newProduct)
 }
 
-func GetProductByID(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Parse ID dari URL path
 	// URL: /api/products/123 -> ID = 123
 	idStr := r.PathValue("id")
@@ -47,21 +57,18 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cari produk dengan ID tersebut
-	for _, p := range products {
-		if p.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(p)
-			return
-		}
+	product, err := h.service.GetByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	// Kalau tidak found
-	http.Error(w, "Product not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(product)
 }
 
 // PUT localhost:8080/api/products/{id}
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// get id dari request
 	idStr := r.PathValue("id")
 
@@ -73,29 +80,25 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data dari request
-	var updateProduct models.Product
-	err = json.NewDecoder(r.Body).Decode(&updateProduct)
+	var product models.Product
+	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	// loop products, cari id, ganti sesuai data dari request
-	for i := range products {
-		if products[i].ID == id {
-			updateProduct.ID = id
-			products[i] = updateProduct
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(updateProduct)
-			return
-		}
+	product.ID = id
+	err = h.service.Update(&product)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Product not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(product)
 }
 
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// get id
 	idStr := r.PathValue("id")
 
@@ -106,19 +109,14 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// loop products cari ID, dapet index yang mau dihapus
-	for i, p := range products {
-		if p.ID == id {
-			// bikin slice baru dengan data sebelum dan sesudah index
-			products = append(products[:i], products[i+1:]...)
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{
-				"message": "Deleted successfully",
-			})
-			return
-		}
+	err = h.service.Delete(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Product not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Deleted successfully",
+	})
 }

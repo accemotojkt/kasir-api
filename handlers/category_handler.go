@@ -3,22 +3,31 @@ package handlers
 import (
 	"encoding/json"
 	"kasir-api/models"
+	"kasir-api/services"
 	"net/http"
 	"strconv"
 )
 
-// In-memory storage (sementara, nanti ganti database)
-var categories = []models.Category{
-	{ID: 1, Name: "Mie Instant", Description: "Mie"},
-	{ID: 2, Name: "Minuman", Description: "Minum Botol"},
+type CategoryHandler struct {
+	service *services.CategoryService
 }
 
-func ListCategories(w http.ResponseWriter, r *http.Request) {
+func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
+	return &CategoryHandler{service: service}
+}
+
+func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	categories, err := h.service.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(categories)
 }
 
-func CreateCategory(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// baca data dari request
 	var newCategory models.Category
 	err := json.NewDecoder(r.Body).Decode(&newCategory)
@@ -27,9 +36,11 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// masukkin data ke dalam variable categories
-	newCategory.ID = len(categories) + 1
-	categories = append(categories, newCategory)
+	err = h.service.Create(&newCategory)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated) // 201
@@ -37,7 +48,7 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 }
 
 // PUT localhost:8080/api/categories/{id}
-func UpdateCategory(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// get id dari request
 	idStr := r.PathValue("id")
 
@@ -49,29 +60,26 @@ func UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data dari request
-	var updateCategory models.Category
-	err = json.NewDecoder(r.Body).Decode(&updateCategory)
+	var category models.Category
+	err = json.NewDecoder(r.Body).Decode(&category)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	// loop categories, cari id, ganti sesuai data dari request
-	for i := range categories {
-		if categories[i].ID == id {
-			updateCategory.ID = id
-			categories[i] = updateCategory
+	category.ID = id
 
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(updateCategory)
-			return
-		}
+	err = h.service.Update(&category)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Category not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(category)
 }
 
-func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	// Parse ID dari URL path
 	// URL: /api/categories/123 -> ID = 123
 	idStr := r.PathValue("id")
@@ -81,20 +89,17 @@ func GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cari categories dengan ID tersebut
-	for _, p := range categories {
-		if p.ID == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(p)
-			return
-		}
+	category, err := h.service.GetByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	// Kalau tidak found
-	http.Error(w, "Category not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(category)
 }
 
-func DeleteCategory(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// get id
 	idStr := r.PathValue("id")
 
@@ -105,19 +110,14 @@ func DeleteCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// loop categories cari ID, dapet index yang mau dihapus
-	for i, p := range categories {
-		if p.ID == id {
-			// bikin slice baru dengan data sebelum dan sesudah index
-			categories = append(categories[:i], categories[i+1:]...)
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{
-				"message": "Deleted successfully",
-			})
-			return
-		}
+	err = h.service.Delete(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Category not found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Deleted successfully",
+	})
 }
