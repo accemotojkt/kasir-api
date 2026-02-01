@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"kasir-api/database"
 	"kasir-api/handlers"
-	"kasir-api/models"
 	"kasir-api/repositories"
 	"kasir-api/services"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -15,19 +16,8 @@ import (
 )
 
 type Config struct {
-	Port string `mapstructure:"PORT"`
-}
-
-// In-memory storage (sementara, nanti ganti database)
-var products = []models.Product{
-	{ID: 1, Name: "Indomie Godog", Price: 3500, Stock: 10},
-	{ID: 2, Name: "Vit 1000ml", Price: 3000, Stock: 40},
-	{ID: 3, Name: "kecap", Price: 12000, Stock: 20},
-}
-
-var categories = []models.Category{
-	{ID: 1, Name: "Mie Instant", Description: "Mie"},
-	{ID: 2, Name: "Minuman", Description: "Minum Botol"},
+	Port        string `mapstructure:"PORT"`
+	DatabaseUrl string `mapstructure:"DATABASE_URL"`
 }
 
 func main() {
@@ -40,8 +30,15 @@ func main() {
 	}
 
 	config := Config{
-		Port: viper.GetString("PORT"),
+		Port:        viper.GetString("PORT"),
+		DatabaseUrl: viper.GetString("DATABASE_URL"),
 	}
+
+	db, err := database.InitDB(config.DatabaseUrl)
+	if err != nil {
+		log.Fatal("Failed to initialize database: ", err)
+	}
+	defer db.Close()
 
 	// localhost:8080/health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +49,7 @@ func main() {
 		})
 	})
 
-	productRepository := repositories.NewProductRepository(products)
+	productRepository := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepository)
 	productHandler := handlers.NewProductHandler(productService)
 
@@ -62,7 +59,7 @@ func main() {
 	http.HandleFunc("PUT /api/products/{id}", productHandler.Update)
 	http.HandleFunc("DELETE /api/products/{id}", productHandler.Delete)
 
-	categoryRepository := repositories.NewCategoryRepository(categories)
+	categoryRepository := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepository)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
@@ -74,7 +71,7 @@ func main() {
 
 	fmt.Println("Server Running di Localhost:" + config.Port)
 
-	err := http.ListenAndServe(":"+config.Port, nil)
+	err = http.ListenAndServe(":"+config.Port, nil)
 	if err != nil {
 		fmt.Println("Gagal Running Server")
 	}
