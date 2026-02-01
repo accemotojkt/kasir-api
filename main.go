@@ -8,7 +8,15 @@ import (
 	"kasir-api/repositories"
 	"kasir-api/services"
 	"net/http"
+	"os"
+	"strings"
+
+	"github.com/spf13/viper"
 )
+
+type Config struct {
+	Port string `mapstructure:"PORT"`
+}
 
 // In-memory storage (sementara, nanti ganti database)
 var products = []models.Product{
@@ -23,6 +31,18 @@ var categories = []models.Category{
 }
 
 func main() {
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if _, err := os.Stat(".env"); err == nil {
+		viper.SetConfigFile(".env")
+		_ = viper.ReadInConfig()
+	}
+
+	config := Config{
+		Port: viper.GetString("PORT"),
+	}
+
 	// localhost:8080/health
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -52,9 +72,9 @@ func main() {
 	http.HandleFunc("PUT /api/categories/{id}", categoryHandler.Update)
 	http.HandleFunc("DELETE /api/categories/{id}", categoryHandler.Delete)
 
-	fmt.Println("Server Running di Localhost:8080")
+	fmt.Println("Server Running di Localhost:" + config.Port)
 
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":"+config.Port, nil)
 	if err != nil {
 		fmt.Println("Gagal Running Server")
 	}
