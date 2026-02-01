@@ -30,11 +30,11 @@ func main() {
 		})
 	})
 
-	http.HandleFunc("GET /api/produk", listProducts)
-	http.HandleFunc("POST /api/produk", createProduct)
-	http.HandleFunc("GET /api/produk/{id}", getProductByID)
-	http.HandleFunc("PUT /api/produk/{id}", updateProduct)
-	http.HandleFunc("DELETE /api/produk/{id}", deleteProduct)
+	http.HandleFunc("GET /api/products", listProducts)
+	http.HandleFunc("POST /api/products", createProduct)
+	http.HandleFunc("GET /api/products/{id}", getProductByID)
+	http.HandleFunc("PUT /api/products/{id}", updateProduct)
+	http.HandleFunc("DELETE /api/products/{id}", deleteProduct)
 
 	http.HandleFunc("GET /api/categories", listCategories)
 	http.HandleFunc("POST /api/categories", createCategory)
@@ -76,7 +76,7 @@ func createProduct(w http.ResponseWriter, r *http.Request) {
 
 func getProductByID(w http.ResponseWriter, r *http.Request) {
 	// Parse ID dari URL path
-	// URL: /api/produk/123 -> ID = 123
+	// URL: /api/products/123 -> ID = 123
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -97,7 +97,7 @@ func getProductByID(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Product not found", http.StatusNotFound)
 }
 
-// PUT localhost:8080/api/produk/{id}
+// PUT localhost:8080/api/products/{id}
 func updateProduct(w http.ResponseWriter, r *http.Request) {
 	// get id dari request
 	idStr := r.PathValue("id")
