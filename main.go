@@ -45,28 +45,9 @@ func main() {
 	})
 
 	// GET localhost:8080/api/produk
-	http.HandleFunc("GET /api/produk", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(produk)
-	})
+	http.HandleFunc("GET /api/produk", listProduk)
 	// POST localhost:8080/api/produk
-	http.HandleFunc("POST /api/produk", func(w http.ResponseWriter, r *http.Request) {
-		// baca data dari request
-		var produkBaru Produk
-		err := json.NewDecoder(r.Body).Decode(&produkBaru)
-		if err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
-
-		// masukkin data ke dalam variable produk
-		produkBaru.ID = len(produk) + 1
-		produk = append(produk, produkBaru)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated) // 201
-		json.NewEncoder(w).Encode(produkBaru)
-	})
+	http.HandleFunc("POST /api/produk", createProduk)
 	// GET localhost:8080/api/produk/{id}
 	http.HandleFunc("GET /api/produk/", getProdukByID)
 	// PUT localhost:8080/api/produk/{id}
@@ -75,28 +56,9 @@ func main() {
 	http.HandleFunc("DELETE /api/produk/", deleteProduk)
 
 	// GET localhost:8080/api/categories
-	http.HandleFunc("GET /api/categories", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(categories)
-	})
+	http.HandleFunc("GET /api/categories", listKategori)
 	// POST localhost:8080/api/categories
-	http.HandleFunc("POST /api/categories", func(w http.ResponseWriter, r *http.Request) {
-		// baca data dari request
-		var kategoriBaru Kategori
-		err := json.NewDecoder(r.Body).Decode(&kategoriBaru)
-		if err != nil {
-			http.Error(w, "Invalid request", http.StatusBadRequest)
-			return
-		}
-
-		// masukkin data ke dalam variable categories
-		kategoriBaru.ID = len(categories) + 1
-		categories = append(categories, kategoriBaru)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated) // 201
-		json.NewEncoder(w).Encode(kategoriBaru)
-	})
+	http.HandleFunc("POST /api/categories", createKategori)
 	// GET localhost:8080/api/categories/{id}
 	http.HandleFunc("GET /api/categories/", getKategoriByID)
 	// PUT localhost:8080/api/categories/{id}
@@ -111,6 +73,29 @@ func main() {
 		fmt.Println("Gagal Running Server")
 	}
 
+}
+
+func listProduk(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(produk)
+}
+
+func createProduk(w http.ResponseWriter, r *http.Request) {
+	// baca data dari request
+	var produkBaru Produk
+	err := json.NewDecoder(r.Body).Decode(&produkBaru)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// masukkin data ke dalam variable produk
+	produkBaru.ID = len(produk) + 1
+	produk = append(produk, produkBaru)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated) // 201
+	json.NewEncoder(w).Encode(produkBaru)
 }
 
 func getProdukByID(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +182,29 @@ func deleteProduk(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "Produk belum ada", http.StatusNotFound)
+}
+
+func listKategori(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
+func createKategori(w http.ResponseWriter, r *http.Request) {
+	// baca data dari request
+	var kategoriBaru Kategori
+	err := json.NewDecoder(r.Body).Decode(&kategoriBaru)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// masukkin data ke dalam variable categories
+	kategoriBaru.ID = len(categories) + 1
+	categories = append(categories, kategoriBaru)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated) // 201
+	json.NewEncoder(w).Encode(kategoriBaru)
 }
 
 // PUT localhost:8080/api/categories/{id}
