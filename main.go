@@ -69,6 +69,12 @@ func main() {
 	http.HandleFunc("PUT /api/categories/{id}", categoryHandler.Update)
 	http.HandleFunc("DELETE /api/categories/{id}", categoryHandler.Delete)
 
+	transactionRepository := repositories.NewTransactionRepository(db)
+	transactionService := services.NewTransactionService(transactionRepository)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
+
+	http.HandleFunc("POST /api/checkout", transactionHandler.Checkout)
+
 	fmt.Println("Server Running di Localhost:" + config.Port)
 
 	err = http.ListenAndServe(":"+config.Port, nil)
